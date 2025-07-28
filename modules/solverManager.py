@@ -1,15 +1,13 @@
+import logging
 
-from enum import Enum
-from solvers import BellmanCompute, PontryaginCustomOptimal, PontryaginEnergyOptimal, PontryaginMovementOptimal
+
+from solvers import _solvers
+
+from solvers.solver import Solver
+
 
 
 class SolverManager:
-    class TASKS(Enum):
-        naiskDvi = u"Наискорейшее движение точки в сопротивляющейся среде"
-        linSys = u"Линейные системы с квадратичным критерием качества"
-        enOpt = u"Энергетически оптимальное движение точки в сопротивляющейся среде"
-        metodDyn = u"Метод динамического программирования"
-    pass
     typeAlg:str
     def __init__(self, typeAlg, fs, bs, psi0=[], **kwargs):
         self.typeAlg = typeAlg
@@ -19,14 +17,15 @@ class SolverManager:
         self.kwargs = kwargs
         pass
 
-    def solve(self):
-        match self.typeAlg:
-            case self.TASKS.naiskDvi.value:
-                return PontryaginMovementOptimal(self.fs, self.bs, self.psi0, **self.kwargs).solve()
-            case self.TASKS.linSys.value:
-                return PontryaginCustomOptimal(self.fs, self.bs, self.psi0, **self.kwargs).solve()
-            case self.TASKS.enOpt.value:
-                return PontryaginEnergyOptimal(self.fs, self.bs, self.psi0, **self.kwargs).solve()
-            case self.TASKS.metodDyn.value:
-                return  BellmanCompute(self.fs, self.bs, self.psi0, **self.kwargs).solve()
+    def get_solver(self) -> Solver:
+        for solver in _solvers:
+            if solver.__qualname__ == self.typeAlg:
+                return solver(self.fs, self.bs, self.psi0, **self.kwargs)
 
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO, filename="solver.log",filemode="w",
+                    format="%(asctime)s %(levelname)s %(message)s")
+
+    solver = SolverManager("BellmanCompute", [0,0], [0,0], [0,0]).get_solver()
+    print(type(solver.solve([])))

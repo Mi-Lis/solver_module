@@ -1,6 +1,4 @@
-from bellman import BellmanCompute
-from pontryaginCustom import PontryaginCustomOptimal
-from pontryaginEnergyOptimal import PontryaginEnergyOptimal
-from pontryaginMovementOptimal import PontryaginMovementOptimal
+from .bellman import BellmanCompute
+from .pontryaginBase import PontryaginCompute
 
-__all__ = ['bellman', 'pontryagin']
+_solvers = [BellmanCompute, PontryaginCompute]
