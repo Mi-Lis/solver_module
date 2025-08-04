@@ -1,2 +1,12 @@
-2025-07-28 21:08:24,127 INFO init
-2025-07-28 21:08:24,128 INFO Started solve
+2025-07-28 22:30:57,837 INFO init
+2025-07-28 22:30:57,838 INFO Started solve
+2025-07-28 22:30:57,839 INFO Started prepareData
+2025-07-28 22:30:57,839 INFO Started prepareData
+2025-07-28 22:30:57,839 INFO Start prepareData
+2025-07-28 22:30:57,839 ERROR Failed exec prepareData
+2025-07-28 22:30:57,839 INFO Started findMinimum
+2025-07-28 22:30:57,840 ERROR Failed exec findMinimum
+2025-07-28 22:30:57,841 INFO Started findOptimal
+2025-07-28 22:30:57,876 INFO Started checkResult
+2025-07-28 22:30:57,877 INFO Started updateResult
+2025-07-28 22:30:57,877 ERROR Failed exec updateResult

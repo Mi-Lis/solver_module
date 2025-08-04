@@ -1,23 +1,24 @@
 import logging
 
 
-from solvers import _solvers
+from .solvers import _solvers
 
-from solvers.solver import Solver
+from .solvers.solver import Solver
 
 
 
 class SolverManager:
     typeAlg:str
-    def __init__(self, typeAlg, fs, bs, psi0=[], **kwargs):
+    def __init__(self):
+
+        pass
+
+    def get_solver(self, typeAlg, fs, bs, psi0=[], **kwargs) -> Solver:
         self.typeAlg = typeAlg
         self.fs = fs
         self.bs = bs
         self.psi0 = psi0
         self.kwargs = kwargs
-        pass
-
-    def get_solver(self) -> Solver:
         for solver in _solvers:
             if solver.__qualname__ == self.typeAlg:
                 return solver(self.fs, self.bs, self.psi0, **self.kwargs)
