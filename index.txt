@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Математический инструмент</title>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    /* Сброс стилей */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Навигационная панель */
+    nav {
+      background-color: #f4f4f4;
+      padding: 10px;
+    }
+    nav ul {
+      list-style: none;
+      display: flex;
+    }
+    nav ul li {
+      margin-right: 20px;
+    }
+    nav ul li a {
+      text-decoration: none;
+      color: #333;
+    }
+
+    .profile {
+      display: flex;
+      align-items: center;
+      margin-top: 20px;
+    }
+    .profile img {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+
+    /* Основное содержимое */
+    main {
+      flex: 1;
+      padding: 20px;
+      margin-left: 40rem;
+      margin-right: 40rem;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .equation-container {
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+    .equation-container h3 {
+      margin-bottom: 10px;
+    }
+    .equation-container textarea {
+      width: 100%;
+      height: 50px;
+      padding: 10px;
+      resize: vertical;
+    }
+    #solve-button {
+      background-color: #0d6efd;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+
+    /* Правая колонка */
+     aside {
+      width: 300px;
+      padding: 20px;
+       align-self: center; 
+    }
+    #plot-solution {
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+      min-height: 300px;
+      min-width: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #plot-solution p {
+      text-align: center;
+    }
+    .controls {
+      display: flex;
+      justify-content: center;
+    }
+    .controls button {
+      margin: 0 10px;
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+    }
+    .controls button img {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Подвал */
+    footer {
+      background-color: #f4f4f4;
+      padding: 20px;
+      text-align: center;
+    }
+
+    /* Стили для MathJax */
+    .mathjax-output {
+      margin-top: 10px;
+      padding: 10px;
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      min-height: 30px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Навигационная панель -->
+  <nav>
+    <ul>
+      <li><a href="#">О сайте</a></li>
+      <li><a href="#">Документация</a></li>
+    </ul>
+  </nav>
+
+  <!-- Основное содержимое -->
+  <main>
+    <!-- Задача №1 -->
+    <div class="equation-container">
+      <h3>Equation №1</h3>
+      <textarea id="formulaInput1" placeholder="Latex input">E = mc^2</textarea>
+      <div id="mathjax-output-1" class="mathjax-output">Mathjax output</div>
+    </div>
+
+    <!-- Задача №2 -->
+    <div class="equation-container">
+      <h3>Equation №2</h3>
+      <textarea id="formulaInput2" placeholder="Latex input">\int_{0}^{\infty} e^{-x^2} dx</textarea>
+      <div id="mathjax-output-2" class="mathjax-output">Mathjax output</div>
+    </div>
+
+    <!-- Кнопка Solve -->
+    <button id="solve-button">Solve</button>
+  </main>
+
+  <!-- Правая колонка -->
+  <aside>
+    <div id="plot-solution">
+      <p>Plot Solution</p>
+    </div>
+    <div class="controls">
+      <button id="share-button"><img src="https://via.placeholder.com/20" alt="Share Icon"></button>
+      <button id="download-button"><img src="https://via.placeholder.com/20" alt="Download Icon"></button>
+    </div>
+  </aside>
+
+  <!-- Подвал -->
+  <footer>
+    <p>О Сайте</p>
+    <p>Документация</p>
+  </footer>
+
+  <script>
+    // Функция обновления MathJax вывода
+    function updateMathJax(elementId, formula) {
+      const outputElement = document.getElementById(elementId);
+      if (formula.trim() !== '') {
+        outputElement.innerHTML = `\\(${formula}\\)`;
+      } else {
+        outputElement.innerHTML = 'Mathjax output';
+      }
+      
+      // Обновляем MathJax
+      if (typeof MathJax !== 'undefined') {
+        MathJax.typesetPromise([outputElement]);
+      }
+    }
+
+    // Инициализация при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+      // Обновляем оба поля вывода
+      updateMathJax('mathjax-output-1', document.getElementById('formulaInput1').value);
+      updateMathJax('mathjax-output-2', document.getElementById('formulaInput2').value);
+      
+      // Добавляем обработчики событий для полей ввода
+      document.getElementById('formulaInput1').addEventListener('input', function() {
+        updateMathJax('mathjax-output-1', this.value);
+      });
+      
+      document.getElementById('formulaInput2').addEventListener('input', function() {
+        updateMathJax('mathjax-output-2', this.value);
+      });
+      
+      // Обработчик для кнопки Solve
+      document.getElementById('solve-button').addEventListener('click', function() {
+        alert('Кнопка Solve нажата!');
+        // prompt: отправка latex строк из equation 1 и equation 2 на бекенд
+      });
+    });
+  </script>
+</body>
+</html>

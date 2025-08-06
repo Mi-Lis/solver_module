@@ -1,5 +1,7 @@
 import logging
 
+from models.formula import Task
+
 
 from .solvers import _solvers
 
@@ -13,15 +15,19 @@ class SolverManager:
 
         pass
 
-    def get_solver(self, typeAlg, fs, bs, psi0=[], **kwargs) -> Solver:
-        self.typeAlg = typeAlg
-        self.fs = fs
-        self.bs = bs
-        self.psi0 = psi0
+    def get_solver(self, task:Task, **kwargs) -> Solver:
+        # self.typeAlg = typeAlg
+        # self.fs = fs
+        # self.bs = bs
+        # self.psi0 = psi0
         self.kwargs = kwargs
         for solver in _solvers:
-            if solver.__qualname__ == self.typeAlg:
-                return solver(self.fs, self.bs, self.psi0, **self.kwargs)
+            if solver.__qualname__ == task.type:
+                return solver([task.equation1,
+                               task.equation2], 
+                               task.border_boundary, 
+                               task.psi_boundary+[task.t_end],
+                               **self.kwargs)
 
 
 if __name__ == '__main__':

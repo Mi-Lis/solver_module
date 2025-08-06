@@ -1,16 +1,16 @@
 from itertools import product
 from typing import List
-
+import logging
 
 import numpy as np
 import sympy as sp
 from scipy.integrate import solve_ivp
 from scipy.optimize import root
-
+from sympy.parsing.latex import parse_latex_lark
+from lark import Tree
 
 from .solver import Solver
 from .tools import logged
-
 
 
 class PontryaginCompute(Solver):
@@ -23,9 +23,10 @@ class PontryaginCompute(Solver):
     def __init__(self, fs:List[sp.Equality], bs:List[float], args=(),u_opt=None, **kwargs) -> None:
         super().__init__()
         self.eps = 1e-5
+        u = sp.Symbol('u')
         self.t = sp.Symbol('t')
         self.num = 50
-        self.n = len(fs)-1
+        self.n = 2
         self.method = 'hybr' 
         self.diffmethod='RK45'
         self.findBalancePoint = False
@@ -49,16 +50,27 @@ class PontryaginCompute(Solver):
         self.bk = bs[self.n:2*self.n]
         self.t0 = bs[-1]
         self.b0 = bs[0:self.n]
-        self.fs = fs
-        self.functional = fs[-1]
-
+        self.fs = [parse_latex_lark(f) for f in fs]
+        print(type(self.fs))
+        self.functional = 1
+    
+    def get_value_from_tree_lark(self, tree):
+        value = []
+        for child in tree.children:
+                if isinstance(child, Tree) and child.data == '_ambig':
+                   value.append(child.children[0])
+                else:
+                    value.append(child)
+        return value[0]
+    
     @logged
     def prepareData(self):
-        self.xs = [sp.Function(f'x_{i}') for i in range(1, self.n+1)]
+        self.xs = [sp.Symbol(r"x"), sp.Symbol(r"y")]
         self.psis = list(sp.symbols(f'psi1:{self.n+1}', cls=sp.Function))
         t = sp.Symbol('t')
-        u = sp.Function('u')(t)
+        u = sp.Symbol('u')
         H = sum([psi(t)*f for psi, f in zip(self.psis, self.fs)])-(self.functional)
+        print(H)
 
         if self.phi:
             self.phi = sp.lambdify([x(t) for x in self.xs], self.phi)
@@ -68,11 +80,10 @@ class PontryaginCompute(Solver):
                 self.u_opt = H.diff(u)
         else:
                 self.u_opt = sp.solve(H.diff(u), u)[0]
+        self.F =  sp.lambdify((*[_x for _x in self.xs], *[psi(t) for psi in self.psis]),
+                 [H.subs(u, self.u_opt).diff(psi(t)) for psi in self.psis]+[-H.subs(u, self.u_opt).diff(x) for x in self.xs],dummify=True)
 
-        self.F =  sp.lambdify((*[x(t) for x in self.xs], *[psi(t) for psi in self.psis]),
-                 [H.subs(u, self.u_opt).diff(psi(t)) for psi in self.psis]+[-H.subs(u, self.u_opt).diff(x(t)) for x in self.xs],('scipy','numpy'),dummify=True)
-
-        self.Hf = sp.lambdify((*[x(t) for x in self.xs], *[psi(t) for psi in self.psis]),H.subs(u, self.u_opt))
+        self.Hf = sp.lambdify((*[_x for _x in self.xs], *[psi(t) for psi in self.psis]),H.subs(u, self.u_opt))
     
     def F_(self, *x):
             t, x0 = x
@@ -106,8 +117,8 @@ class PontryaginCompute(Solver):
     
     @logged
     def findOptimal(self):
-        tn = np.linspace(self.t0, self.y0[-1], self.num)
-        y_toch = solve_ivp(self.F_, [self.t0, tn[-1]], np.concatenate((self.b0, self.y0[:-1])), t_eval=tn, method = self.diffmethod).y.T
+        self.tn = np.linspace(self.t0, self.y0[-1], self.num)
+        y_toch = solve_ivp(self.F_, [self.t0, self.tn[-1]], np.concatenate((self.b0, self.y0[:-1])), t_eval=self.tn, method = self.diffmethod).y.T
         self.psin = y_toch[:,self.n:self.n*2]
         print(self.psin, self.psis)
         self.xn = y_toch[:,0:self.n]
@@ -119,12 +130,11 @@ class PontryaginCompute(Solver):
 
     @logged 
     def updateResult(self):
-        self.u = sp.lambdify((*[x(self.t) for x in self.xs], *[psi(self.t) for psi in self.psis]), self.u_opt, modules='numpy')
+        self.u = sp.lambdify((*[x for x in self.xs], *[psi(self.t) for psi in self.psis]), self.u_opt, modules='numpy')
         u = np.array([self.u(*x, *psi) for x, psi in zip(self.xn, self.psin)])
 
 
-        self.tk = self.y0[-1]
-        self.__res["tk"] = self.tk
+        self.__res["tk"] = self.tn
         self.__res["xn"] = self.xn
         self.__res["un"] = u
 

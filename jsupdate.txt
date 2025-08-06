@@ -1,0 +1,39 @@
+
+  <script>
+    // Функция обновления MathJax вывода
+    function updateMathJax(elementId, formula) {
+      const outputElement = document.getElementById(elementId);
+      if (formula.trim() !== '') {
+        outputElement.innerHTML = `\\(${formula}\\)`;
+      } else {
+        outputElement.innerHTML = 'Mathjax output';
+      }
+      
+      // Обновляем MathJax
+      if (typeof MathJax !== 'undefined') {
+        MathJax.typesetPromise([outputElement]);
+      }
+    }
+
+    // Инициализация при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+      // Обновляем оба поля вывода
+      updateMathJax('mathjax-output-1', document.getElementById('formulaInput1').value);
+      updateMathJax('mathjax-output-2', document.getElementById('formulaInput2').value);
+      
+      // Добавляем обработчики событий для полей ввода
+      document.getElementById('formulaInput1').addEventListener('input', function() {
+        updateMathJax('mathjax-output-1', this.value);
+      });
+      
+      document.getElementById('formulaInput2').addEventListener('input', function() {
+        updateMathJax('mathjax-output-2', this.value);
+      });
+      
+      // Обработчик для кнопки Solve
+      document.getElementById('solve-button').addEventListener('click', function() {
+        alert('Кнопка Solve нажата!');
+        // prompt: отправка latex строк из equation 1 и equation 2 на бекенд
+      });
+    });
+  </script>
